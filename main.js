@@ -1,5 +1,3 @@
-var AM = new AssetManager();
-
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -74,9 +72,8 @@ Background.prototype.update = function () {
 
 
 
-function Cell(game, array) {
+function Cell(game) {
     this.ctx = game.ctx;
-    this.array = array;
     Entity.call(this, game, 0, 0);
 }
 
@@ -84,10 +81,10 @@ Cell.prototype = new Entity();
 Cell.prototype.constructor = Cell;
 
 Cell.prototype.draw = function () {
-    for (let i = 0; i < this.array.length; i++) {
-        let row = this.array[i];
+    for (let i = 0; i < this.game.array.length; i++) {
+        let row = this.game.array[i];
         for (let j = 0; j < row.length; j++) {
-            if (this.array[i][j] == '1') {
+            if (this.game.array[i][j] == '1') {
                 this.ctx.fillRect(j * this.game.cellHeight, i * this.game.cellWidth, this.game.cellWidth, this.game.cellHeight);
             }
         }
@@ -98,24 +95,24 @@ Cell.prototype.update = function () {
     
     // Handle adding cell to array
     if (this.game.click != null) {
-        this.array[Math.floor(this.game.click.y / this.game.cellHeight)][Math.floor(this.game.click.x / this.game.cellWidth)] = 1;
+        this.game.array[Math.floor(this.game.click.y / this.game.cellHeight)][Math.floor(this.game.click.x / this.game.cellWidth)] = 1;
         this.game.click = null;
     }
 
     // Handle pattern change
     if (this.game.choice != 0) {
         if (this.game.choice == 1) {
-            this.array = gosperGun.map(inner => inner.slice());
+            this.game.array = gosperGun.map(inner => inner.slice());
         } else if (this.game.choice == 2) {
-            this.array = pulsar.map(inner => inner.slice());
+            this.game.array = pulsar.map(inner => inner.slice());
         } else if (this.game.choice == 3) {
-            this.array = figureEight.map(inner => inner.slice());
+            this.game.array = figureEight.map(inner => inner.slice());
         } else if (this.game.choice == 4) {
-            this.array = octagon.map(inner => inner.slice());
+            this.game.array = octagon.map(inner => inner.slice());
         } else if (this.game.choice == 5) {
-            this.array = circleFire.map(inner => inner.slice());
+            this.game.array = circleFire.map(inner => inner.slice());
         } else if (this.game.choice == 6) {
-            fillArray(this.array);
+            fillArray(this.game.array);
         }
 
         this.game.choice = 0;
@@ -123,10 +120,10 @@ Cell.prototype.update = function () {
 
     // Handle clearing the board
     if (this.game.clear) {
-        for (let i = 0; i < this.array.length; i++) {
-            let row = this.array[i];
+        for (let i = 0; i < this.game.array.length; i++) {
+            let row = this.game.array[i];
             for (let j = 0; j < row.length; j++) {
-                this.array[i][j] = 0;
+                this.game.array[i][j] = 0;
             }
         }
         this.game.clear = false;
@@ -136,10 +133,10 @@ Cell.prototype.update = function () {
     if (!this.game.paused) {
         let i, j, k, l;
 
-        let newArray = this.array.map(inner => inner.slice());
+        let newArray = this.game.array.map(inner => inner.slice());
     
-        for (i = 0; i < this.array.length; i++) {
-            let row = this.array[i];
+        for (i = 0; i < this.game.array.length; i++) {
+            let row = this.game.array[i];
             for (j = 0; j < row.length; j++) {
     
                 /**
@@ -152,7 +149,7 @@ Cell.prototype.update = function () {
 
                         // handle out of bound array checking
                         if ((i + k >= 0) && (i + k) < this.game.arrayWidth && (j + l >= 0) && (j + l < this.game.arrayHeight)) {
-                            aliveNeighbors += this.array[i + k][j + l];
+                            aliveNeighbors += this.game.array[i + k][j + l];
                         }
                         
                     }
@@ -162,27 +159,27 @@ Cell.prototype.update = function () {
                  * Subtract the cell itself since that's 
                  * not a neighbor
                  */
-                aliveNeighbors -= this.array[i][j];
+                aliveNeighbors -= this.game.array[i][j];
 
-                if ((this.array[i][j] == 1) && (aliveNeighbors < 2)) {
+                if ((this.game.array[i][j] == 1) && (aliveNeighbors < 2)) {
                     // If cell is alive and has fewer than 2 alive neighbors, dies of loneliness
                     newArray[i][j] = 0;  
     
-                } else if ((this.array[i][j] == 1) && (aliveNeighbors > 3)) {
+                } else if ((this.game.array[i][j] == 1) && (aliveNeighbors > 3)) {
                     // If cell is alive and has more than 3 alive neighbors, dies of overcrowding
                     newArray[i][j] = 0;
     
-                } else if ((this.array[i][j] == 0) && (aliveNeighbors == 3)) {
+                } else if ((this.game.array[i][j] == 0) && (aliveNeighbors == 3)) {
                     // If cell is dead and has exactly 3 neighbors, revive
                     newArray[i][j] = 1;
 
                 } else {
-                    newArray[i][j] = this.array[i][j];
+                    newArray[i][j] = this.game.array[i][j];
                 }
                 
             }
         }
-        this.array = newArray;
+        this.game.array = newArray;
     } 
 }
 
@@ -458,9 +455,41 @@ let circleFire = [                                          //M
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
-AM.queueDownload("./img/game of life.png");
 
-AM.downloadAll(function () {
+var socket = io.connect("http://24.16.255.56:8888");
+
+window.onload = function () {
+    
+    socket.on("connect", function () {
+        console.log("Socket connected.")
+    });
+
+    socket.on("disconnect", function () {
+        console.log("Socket disconnected.")
+    });
+
+    socket.on("reconnect", function () {
+        console.log("Socket reconnected.")
+    });
+
+    let saveButton = document.getElementById("save");
+    saveButton.onclick = function() {
+        console.log("Saving state...");
+        socket.emit("save", {studentname:"Giovanni Tang", statename:"userSave", data:gameEngine.array});
+        console.log("Saved!");
+    }
+
+    let loadButton = document.getElementById("load");
+    loadButton.onclick = function() {
+        console.log("Loading state...");
+        socket.emit("load", {studentname:"Giovanni Tang", statename:"userSave"});
+    }
+
+    socket.on("load", function (data) {
+        gameEngine.array = data.data;
+        console.log("Loaded!");
+    });
+
     var canvas = document.getElementById("gameWorld");
     canvas.focus();
     var ctx = canvas.getContext("2d");
@@ -487,9 +516,10 @@ AM.downloadAll(function () {
     gameEngine.cellHeight = cellHeight;
     gameEngine.width = width;
     gameEngine.height = height;
+    gameEngine.array = gosperGun;
 
     gameEngine.addEntity(new Background(gameEngine));
-    gameEngine.addEntity(new Cell(gameEngine, gosperGun));
+    gameEngine.addEntity(new Cell(gameEngine));
 
     console.log("All Done!");
-});
+};
