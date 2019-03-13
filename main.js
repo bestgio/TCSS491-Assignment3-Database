@@ -477,12 +477,14 @@ window.onload = function () {
         console.log("Saving state...");
         socket.emit("save", {studentname:"Giovanni Tang", statename:"userSave", data:gameEngine.array});
         console.log("Saved!");
+        document.getElementById("gameWorld").focus();
     }
 
     let loadButton = document.getElementById("load");
     loadButton.onclick = function() {
         console.log("Loading state...");
         socket.emit("load", {studentname:"Giovanni Tang", statename:"userSave"});
+        document.getElementById("gameWorld").focus();
     }
 
     socket.on("load", function (data) {
